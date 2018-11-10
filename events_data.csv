@@ -1,0 +1,8 @@
+eventId,"[ 0.  0.  0. ...,  0.  0.  0.]"
+recordingNumber,"[ 0.  0.  0. ...,  0.  0.  0.]"
+eventType,"[ 0.  0.  0. ...,  0.  0.  0.]"
+nodeId,"[ 0.  0.  0. ...,  0.  0.  0.]"
+header,"{'description': ""'each record contains one 64-bit timestamp, one 16-bit sample position, one uint8 event type, one uint8 processor ID, one uint8 event ID, one uint8 event channel, and one uint16 recordingNumber'"", 'format': ""'Open Ephys Data Format'"", 'blockLength': '1024', 'sampleRate': '30000', 'bitVolts': '1', ' date_created': ""'29-Apr-2015 174813'"", ' header_bytes': '1024', 'bufferSize': '1024', ' version': '0.4', 'channelType': ""'Event'"", 'channel': ""'Events'""}"
+sampleNum,"[ 0.  0.  0. ...,  0.  0.  0.]"
+timestamps,"[ 0.  0.  0. ...,  0.  0.  0.]"
+channel,"[ 0.  0.  0. ...,  0.  0.  0.]"
