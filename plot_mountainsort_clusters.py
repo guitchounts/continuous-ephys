@@ -8,6 +8,8 @@ import pandas as pd
 import json
 sys.path.append("/Users/guitchounts/Documents/GitHub/mountainlab/old/WIP/python/mda/")
 sys.path.append('/Users/guitchounts/Dropbox (coxlab)/Scripts/Repositories/continuous-ephys/utils')
+sys.path.append('/n/home11/guitchounts/code/continuous-ephys/utils')
+sys.path.append('/n/home11/guitchounts/code/mountainlab/old/WIP/python/mda/')
 
 from utils import read_titan_rhd
 from mdaio import readmda
