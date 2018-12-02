@@ -101,7 +101,7 @@ if __name__ == "__main__":
         #print('clusts = ',clusts)                                                                  
         for clu_idx,clu in enumerate(clusts):
             
-            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'metrics' : []  }
+            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'slopes' : [], 'metrics' : []  }
 
             for ch in range(4):
                 
@@ -122,9 +122,12 @@ if __name__ == "__main__":
                 max_wv = min_wv + np.argmax(y.flatten()[min_wv:min_wv+spike_width/2])
                 width = (max_wv - min_wv) / fs * 1e3
                 height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
+                slope = np.mean(np.gradient( y[-spike_width/4 : ]  )) ## take the mean gradient of the end of the spike waveform... 
+
 
                 waveform_stats[tetrode_num][clu]['widths'].append(width)
                 waveform_stats[tetrode_num][clu]['heights'].append(height)
+                waveform_stats[tetrode_num][clu]['slopes'].append(slope)
 
                 #clu_isi = np.diff(clu_times) ## convert from seconds to ms
 
