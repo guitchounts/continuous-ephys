@@ -148,7 +148,7 @@ if __name__ == "__main__":
                 axarr[clu_idx,1].axes.yaxis.set_ticklabels([])
                 axarr[clu_idx,1].axes.yaxis.set_ticks([])
 
-            waveform_stats[tetrode_num][clu]['metics'] = metrics['clusters'][clu_idx] #['firing_rate']
+            waveform_stats[tetrode_num][clu]['metrics'] = metrics['clusters'][clu_idx] #['firing_rate']
 
             axarr[clu_idx,2].text(0,0,metrics['clusters'][clu_idx],wrap=True,fontdict={'fontsize' : 6})
             axarr[clu_idx,2].axes.yaxis.set_ticklabels([])
