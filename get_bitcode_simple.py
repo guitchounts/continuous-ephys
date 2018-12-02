@@ -1,9 +1,15 @@
-import os
+import os,sys
 import multiprocessing
 import datetime
-import pymworks
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+sys.path.append('/Users/guitchounts/Dropbox (coxlab)/Scripts/Repositories/pymworks')
+
+sys.path.append('/Volumes/Mac HD/Dropbox (coxlab)/Scripts/Repositories/pymworks')
+
+import pymworks
 
 def get_bitcode_simple(animal_name, session_filename):
     

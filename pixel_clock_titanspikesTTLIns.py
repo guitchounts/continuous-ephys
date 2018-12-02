@@ -2,15 +2,15 @@
 import sys, os,re
 import h5py
 from utils import pixelclock, timebase
-import open_ephys
+#import open_ephys
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib
-from get_bitcode_simple import get_bitcode_simple
+#from get_bitcode_simple import get_bitcode_simple
 import itertools
-import concatenateKWIKfiles
+#import concatenateKWIKfiles
 import pandas as pd
-from bokeh.io import gridplot, output_file, show, vplot
+from bokeh.io import output_file, show #, vplot # grid_plot
 from bokeh.plotting import figure
 from bokeh.models import TapTool, HoverTool
 from bokeh.colors import RGB
@@ -21,10 +21,12 @@ import  titanspikes_ttl_extract
 # mworks
 try:
     sys.path.append('/Library/Application Support/MWorks/Scripting/Python')
+    sys.path.append('/Users/guitchounts1/Library/Application Support/MWorks/Scripting/Python')
+    
     import mworks.data as mw
 except Exception as e:
     print("Please install mworks...")
-    print e
+    print(e)
 
 
 def isiterable(o):
@@ -66,11 +68,11 @@ def highpass_codetimes(code_times,fs,thresh_samples = 0.2):
     dels = []
     diffs = [j-i for i, j in zip(code_times[:-1,0], code_times[1:,0])]
     
-    print 'Running lowpass on codetimes'
+    print('Running lowpass on codetimes')
 
     for idx,item in enumerate(diffs):
         if item > thresh:
-            print 'time greater than thresh = ', item
+            print('time greater than thresh = ', item)
                     
             dels.append(idx)
 
@@ -90,11 +92,11 @@ def lowpass_codetimes(code_times,fs,thresh_samples = 0.2):
     dels = []
     diffs = [j-i for i, j in zip(code_times[:-1,0], code_times[1:,0])]
     
-    print 'Running lowpass on codetimes'
+    print('Running lowpass on codetimes')
 
     for idx,item in enumerate(diffs):
         if item < thresh:
-            print 'time less than thresh = ', item
+            #print 'time less than thresh = ', item
                     
             dels.append(idx)
 
@@ -124,7 +126,7 @@ def fit_line(oe,mw):  #### oe = x; mw = y variable.
     A = np.vstack([oe[0:1000], np.ones(len(oe[0:1000]))]).T ## ! might be dangerous to hardcode the 1000 here but using 
     # length = min(len(oe),len(mw)) ==== 13000 in the case for one exp for grat17 == bad result (likely because the matches suck beyond the very beginning)
     m,c = np.linalg.lstsq(A,mw[0:1000])[0]
-    print 'm,c = ', m,c
+    print('m,c = ', m,c)
 
     return m,c
 
@@ -151,7 +153,7 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
     experiment_length=[]
 
 
-    print 'Experiment length = ', experiment_length    
+    print('Experiment length = ', experiment_length)
 
     
     #oe_codes, latencies = pixelclock.events_to_codes(np.vstack((times, channels, directions)).T, len(oe_channels), 0.01)
@@ -163,7 +165,7 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
     # oe_codes[0,:] = times
     # oe_codes[1,:] = codes
 
-    print 'Number of ephys codes = ', len(oe_codes)
+    print('Number of ephys codes = ', len(oe_codes))
 
    
     # !! assuming there's just one mworks file, take the first element in the list mwk_path:
@@ -180,7 +182,7 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
     # bit_codes is a list of (time, code) tuples
     mw_codes = [(e.time, e.value['bit_code']) for e in stimulus_announces if isiterable(e.value) and 'bit_code' in e.value]
 
-    print 'Number of mworks codes = ', len(mw_codes)
+    print('Number of mworks codes = ', len(mw_codes))
     ## for mw_codes and oe_codes - if one code persists for too long a time (>thresh), get rid of it (keep only the fast-changing codes that come from the grating stimulus):
 
     oe_codes = lowpass_codetimes(oe_codes,fs=1,thresh_samples = 0.01) #0.2
@@ -188,8 +190,8 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
 
 
 
-    print 'Number of oe codes after lowpass = ', len(oe_codes)
-    print 'Number of mworks codes after lowpass = ', len(mw_codes)
+    print('Number of oe codes after lowpass = ', len(oe_codes))
+    print('Number of mworks codes after lowpass = ', len(mw_codes))
 
 
 
@@ -204,9 +206,9 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
     # 3. get pixel clock matches
     matches = []
     win_size = 40
-    print 'win max is ',int(len(oe_codes)/win_size)
+    print('win max is ',int(len(oe_codes)/win_size))
     for win in range(0,int(len(oe_codes)/win_size),50): #range(int(round(len(oe_codes)/win_size)))
-        print 'win = ', win
+        print('win = ', win)
         if win*win_size+win_size < len(oe_codes):
             tmp_match = pixelclock.match_codes(
                 [evt[0] for evt in oe_codes[win*win_size:(win+1)*win_size]], # oe times
@@ -215,10 +217,10 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
                 [evt[1] for evt in mw_codes], # mw codes
                 minMatch = 20,
                 maxErr = 0) 
-            print 'temp matches = ', tmp_match
+            print('temp matches = ', tmp_match)
             matches.extend(tmp_match)
         else:
-            print '!!win = ', win
+            #print '!!win = ', win
             tmp_match = pixelclock.match_codes(
                     [evt[0] for evt in oe_codes[win*win_size:-1]], # oe times
                     [evt[1] for evt in oe_codes[win*win_size:-1]], # oe codes
@@ -230,8 +232,8 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
             matches.extend(tmp_match)
     
     
-    print 'matches = ', matches
-    print 'type = ', type(matches)
+    print('matches = ', matches)
+    #print 'type = ', type(matches)
   
 
     mw_times = [item[0] for item in mw_codes] #[e.time for e in stimulus_announces if isiterable(e.value)]
@@ -317,7 +319,7 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
 
     ## to test quality of match, plot OE codes in MW time
 
-    print 'len plot_oe_codetimes = ', len(plot_oe_codetimes)
+    print('len plot_oe_codetimes = ', len(plot_oe_codetimes))
 
 
 
@@ -408,13 +410,13 @@ def sync_pixel_clock(mwk_path, oe_path, oe_channels=[0, 1]):
     show(pp)
 
 
-    print "number of MW events:"
-    print len(mw_times)
+    print("number of MW events:")
+    print(len(mw_times))
 
-    print "number of OE events:"
-    print len(oe_times)
+    print("number of OE events:")
+    print(len(oe_times))
 
-    print "number of matches: " + str(len(matches))
+    print("number of matches: " + str(len(matches)))
     
     linefit = dict(m=[m],c=[c])
     linefit_pd = pd.DataFrame.from_dict(linefit)
@@ -579,9 +581,9 @@ if __name__ == "__main__":
     
     oe_path = sys.argv[1]
 
-    print 'mwk path is ', mwk_path
+    print('mwk path is ', mwk_path)
     
-    print 'oe path is ', oe_path
+    print('oe path is ', oe_path)
 
 
 
@@ -605,7 +607,7 @@ if __name__ == "__main__":
 
     ## get experiment number for oe times? 
 
-    print 'oe_stim_transition_times = ', oe_stim_transition_times
+    print('oe_stim_transition_times = ', oe_stim_transition_times)
 
     #d = {'times':oe_stim_transition_times,'orientations':stim_orientations} #,'experiment_lengths':experiment_length
     d = dict(times = oe_stim_transition_times, orientations = stim_orientations)

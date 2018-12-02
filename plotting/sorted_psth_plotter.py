@@ -4,7 +4,8 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from bokeh.plotting import figure,show
-from bokeh.io import output_notebook, gridplot, output_file, show, save, vplot
+from bokeh.io import output_notebook, output_file, show, save #, vplot # gridplot
+from bokeh.layouts import column
 from bokeh import palettes
 import struct
 import datetime
@@ -41,7 +42,7 @@ def plot_spike_psth(cluster_data,stim_data,channel_name,sorted_save_folder):
 	#trial_time_vector = np.linspace(-trial_range,trial_range,300) ## 300=trial length, in LFP sample (LFP fs=300 samples/sec)
 
 	if any('clusters' in s for s in list(cluster_data.columns.values)):
-		clusters = range(cluster_data.clusters.max()+1)
+		clusters = range(cluster_data.clusters.astype(int).max()+1)
 	else:
 		clusters = range(len(cluster_data.spikes[0]))
 
@@ -69,7 +70,7 @@ def plot_spike_psth(cluster_data,stim_data,channel_name,sorted_save_folder):
 				
 				temp_idx = (cluster_data.times[cluster_data.clusters==clust] < trial_time+trial_range) & (cluster_data.times[cluster_data.clusters==clust] > trial_time - trial_range)
 				#print 'type(temp_idx) = ', type(temp_idx)
-				print 'temp_idx = ', temp_idx
+				#print 'temp_idx = ', temp_idx
 				clust_trial_times = cluster_data.times[temp_idx[temp_idx==True].index.values].values - trial_time	
 				
 				trial_spiketimes.append(clust_trial_times)
@@ -299,8 +300,9 @@ def plot_spike_psth(cluster_data,stim_data,channel_name,sorted_save_folder):
 			if not os.path.exists(save_folder):
 				os.makedirs(save_folder)
 			output_file(save_folder + '/spike_histogram_'+str(ori)+'.html')
-			grid = gridplot([[raster], [histo_fig],[firingrate_line]]) #,[firingrate_line]
-
+			#grid = gridplot([[raster], [histo_fig],[firingrate_line]]) #,[firingrate_line]
+			grid = column([[raster], [histo_fig],[firingrate_line]]) #,[firingrate_line]
+			
 			save(grid)
 
 		    #stim_name = 'orientation_' + ori
@@ -326,7 +328,8 @@ def plot_spike_psth(cluster_data,stim_data,channel_name,sorted_save_folder):
 		tuning_fig.multi_line(err_xs,err_ys)
 
 
-		grid2 = gridplot([[tuning_fig],[firingrate_lines]]) #,[firingrate_line]
+		#grid2 = gridplot([[tuning_fig],[firingrate_lines]]) #,[firingrate_line]
+		grid2 = column([[tuning_fig],[firingrate_lines]]) #,[firingrate_line]
 
 
 		output_file(save_folder + '/tuning.html')
@@ -486,7 +489,7 @@ if __name__ == "__main__":
 	else:
 		cluster_data = pd.read_csv(spikes_path)
 	
-	stim_data = pd.read_pickle(behavior_path) # read the CSV file with stimulus times and orientations
+	stim_data = pd.read_csv(behavior_path) # read the CSV file with stimulus times and orientations
 
 	
 	

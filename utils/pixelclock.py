@@ -69,7 +69,7 @@ def state_to_code(state):
     code : int
         Reconstructed pixel clock code
     """
-    return sum([state[i] << i for i in xrange(len(state))]) # << = bit shift operator
+    return sum([state[i] << i for i in range(len(state))]) # << = bit shift operator
     # this is from photodiode to bit code 
 
 def events_to_codes(events, nchannels, minCodeTime,swap_12_codes = 1,swap_03_codes=0):
@@ -111,14 +111,14 @@ def events_to_codes(events, nchannels, minCodeTime,swap_12_codes = 1,swap_03_cod
     evts = evts[evts[:,0].argsort(),:] # sort events
     # get initial state by looking at first transitions
     state = []
-    for i in xrange(nchannels):
+    for i in range(nchannels): ## was range
         d = evts[np.where(evts[:,1] == i)[0][0],2]
         if d == 1:
             state.append(0)
         else:
             state.append(1)
 
-    print "min code time = ", minCodeTime
+    print("min code time = ", minCodeTime)
     # logging.debug("Initial state: %s = %i" % (state, state_to_code(state)))
     # print evts
     # print "Initial state: %s = %i" % (state, state_to_code(state))
@@ -127,7 +127,7 @@ def events_to_codes(events, nchannels, minCodeTime,swap_12_codes = 1,swap_03_cod
     trigDirection = int(evts[0,2])
     codes = []
     
-    latencies = [ [ [] for x in xrange(nchannels)] for y in xrange(nchannels)]
+    latencies = [ [ [] for x in range(nchannels)] for y in range(nchannels)]
     for ev in evts:
         if abs(ev[0] - trigTime) > minCodeTime:
             # new event
@@ -178,7 +178,7 @@ def get_marker_delta(nchannels, pcY, pcHeight, screenHeight, sepRatio):
 def get_marker_positions(nchannels, pcY, pcHeight, screenHeight, sepRatio):
     if pcY != -28: raise ValueError("Pixel clock is assumed to be at bottom of screen")
     delta = get_marker_delta(nchannels, pcY, pcHeight, screenHeight, sepRatio)
-    pos = [screenHeight - (delta * (i+1)) for i in xrange(nchannels)]
+    pos = [screenHeight - (delta * (i+1)) for i in range(nchannels)]
     logging.debug("Pixel Clock Postions: %s" % str(pos))
     return pos
 
@@ -236,14 +236,14 @@ def offset_codes(codes, latencies, pcY, pcHeight, screenHeight, sepRatio):
     # 
     # posDeltaDegrees = markerDegrees + sepDegrees # spacing between pixel clock patch bottom edges
     # posDegrees = [] # bottom edge of on screen pixel clock patches
-    # for i in xrange(nchannels):
+    # for i in range(nchannels):
     #     posDegrees.append(screenHeight - (posDeltaDegrees * (i+1)))
     
     # avgSpeeds = np.zeros((nchannels,nchannels))
     allSpeeds = []
     
-    for x in xrange(nchannels):
-        for y in xrange(nchannels):
+    for x in range(nchannels):
+        for y in range(nchannels):
             if abs(x - y) < 2: continue # only use latencies for non-adjacent patches
             wt = abs(x - y) * delta
             if wt == 0:
@@ -259,13 +259,13 @@ def offset_codes(codes, latencies, pcY, pcHeight, screenHeight, sepRatio):
     # np.savetxt('allspeeds',allSpeeds)
     
     avgSpeed = np.mean(allSpeeds) # avgSpeed in samples per degree
-    print allSpeeds
+    #print allSpeeds
     # offsets = (np.array(posDegrees) * avgSpeed).astype(int)
     offsets = np.array(positions) * avgSpeed
     offsets = np.round(offsets).astype(int)
     
     codeArray = np.array(copy.deepcopy(codes))
-    for i in xrange(len(codes)):
+    for i in range(len(codes)):
         channel = codeArray[i,2]
         codeArray[i,0] = codeArray[i,0] - offsets[channel]
     
@@ -401,7 +401,7 @@ def match_codes(auTimes, auCodes, mwTimes, mwCodes, minMatch = 5, maxErr = 0):
     # step through mwCodes, looking for audioTimes
     auI = -1
     matches = []
-    for mwI in xrange(len(mwCodes)):
+    for mwI in range(len(mwCodes)):
         matchFound = False
         code = mwCodes[mwI]
         for aui in lookup[code][np.where(lookup[code] > auI)[0]]:
@@ -420,7 +420,7 @@ def slow_match_codes(audioTimes, audioCodes, mwTimes, mwCodes, minMatch = 10, ma
     auN = len(audioTimes)
     testSize = minMatch + maxErr + 1
     audioCodes = np.array(audioCodes)
-    for mwI in xrange(len(mwCodes)):
+    for mwI in range(len(mwCodes)):
         matchFound = False
         auT = auI
         while (not matchFound) and ((auT + testSize) <= auN):
@@ -445,7 +445,7 @@ def test_matches():
     ncodes = 100
     mwCodes = []
     lastCode = np.random.randint(1,16)
-    for i in xrange(ncodes):
+    for i in range(ncodes):
         r = np.random.randint(1,16)
         while r == lastCode:
             r = np.random.randint(1,16)
@@ -589,21 +589,21 @@ def parse(pc_data, threshold = 0.03, refractory = 44, minCodeTime = 441,
     # events should be = to our [pixel_ch1, pixel_ch2]
     #events = pc_data
     events = np.array([[range(0,50)], [np.random.randint(2, size=50)], [np.random.randint(2, size=50)]])
-    print len(events)
+    print(len(events))
     logging.debug("Reconstructing codes")
     codes, offsets, speed = reconstruct_codes(events, nchannels, minCodeTime, pcY, pcHeight, screenHeight, sepRatio)
     return codes, offsets, speed
 
 def test_parse():
     # TODO : how do I deal with external data files?
-    # audioFiles = ["pixel_clock/pixel_clock%i#01.wav" % i for i in xrange(1,5)]
-    audioFiles = ["pixel_clock/%i.wav" % i for i in xrange(1,5)]
+    # audioFiles = ["pixel_clock/pixel_clock%i#01.wav" % i for i in range(1,5)]
+    audioFiles = ["pixel_clock/%i.wav" % i for i in range(1,5)]
     codes, offsets, speed = parse(audioFiles)
-    print offsets, speed
+    #print offsets, speed
     # return codes, offsets, speed
     np.savetxt('codes',codes)
-    print codes[:,0]
-    print codes[:,1]
+    #print codes[:,0]
+    #print codes[:,1]
 
 def old_time_match_mw_with_pc(pc_codes, pc_times, mw_codes, mw_times,
                                 submatch_size = 10, slack = 0, max_slack=10,
@@ -620,7 +620,7 @@ def old_time_match_mw_with_pc(pc_codes, pc_times, mw_codes, mw_times,
             good_flag = True
 
             total_slack = 0
-            for j in xrange(submatch_size):
+            for j in range(submatch_size):
                 target = match_sequence[j]
                 if target != pc_codes[i+j+total_slack]:
                     slack_match = False
@@ -713,8 +713,8 @@ def process(pc_data, mwTimes, mwCodes, threshold = 0.03, refractory = 44, minCod
 
 def test_process():
     # TODO : how do I deal with external data files?
-    audioFiles = ["pixel_clock/pixel_clock%i#01.wav" % i for i in xrange(1,5)]
-    # audioFiles = ["pixel_clock/%i.wav" % i for i in xrange(1,5)]
+    audioFiles = ["pixel_clock/pixel_clock%i#01.wav" % i for i in range(1,5)]
+    # audioFiles = ["pixel_clock/%i.wav" % i for i in range(1,5)]
     codes, offsets, speed = parse(audioFiles)
     # read mworks codes
     import ast

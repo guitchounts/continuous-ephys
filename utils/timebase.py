@@ -40,7 +40,7 @@ class TimeBase(object):
         #   b + offset = a
         self.offsets = self.matches[:,0] - self.matches[:,1]
 
-        print 'offsets = ', self.offsets 
+        print('offsets = ', self.offsets)
         
         if cull: self.cull_offsets()
 
@@ -54,11 +54,11 @@ class TimeBase(object):
 
         A = np.vstack([self.oe_times[0:num_codes], np.ones(num_codes)]).T ## ! might be dangerous to hardcode the 1000 here but using 
         # length = min(len(oe),len(mw)) ==== 13000 in the case for one exp for grat17 == bad result (likely because the matches suck beyond the very beginning)
-        print 'A.shape = ', A.shape
+        print('A.shape = ', A.shape)
         #print 'len(self.mw_times[0:len(self.oe_times)+1]) = ', len(self.mw_times[0:len(self.oe_times)+1])
-        print 'len(self.mw_times[0:num_codes] )  = ', len(self.mw_times[0:num_codes])
+        print('len(self.mw_times[0:num_codes] )  = ', len(self.mw_times[0:num_codes]))
         m,c = np.linalg.lstsq(A,self.mw_times[0:num_codes])[0]
-        print 'm,c = ', m,c
+        print('m,c = ', m,c)
 
         self.m = m
         self.c = c
@@ -152,8 +152,8 @@ class TimeBase(object):
                     audio_times[t] = matched_time
             return audio_times
         else:
-            print 'len self.matches[:,1] ', len(self.matches[:,1])
-            print 'len mw ', len(mw)
+            print('len self.matches[:,1] ', len(self.matches[:,1]))
+            print('len mw ', len(mw))
             closest = np.where(self.matches[:,1] >= mw)[0]
             if len(closest) == 0:
                 #logging.warning("mw_time_to_audio matched to last offset")

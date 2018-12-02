@@ -43,7 +43,7 @@ def read_ttl_file(file_path,channel):
 	
 	ttl_seconds = [thing*MSDNrate/fs + np.uint64(ephysfilename) for thing in ttl]
 
-	print 'ttl[0:10 =', ttl[0:10]
+	print('ttl[0:10 =', ttl[0:10])
 
 	# get seconds.microseconds from start of file. 
 	
@@ -52,15 +52,15 @@ def read_ttl_file(file_path,channel):
 	ttl_seconds = [(matlab2datetime(thing) - start_time).total_seconds() for thing in ttl_seconds] # convert 636s to datetime objects
 	# ttl_seconds = seconds.microseconds
 	
-	print 'Ephys file start time = ', start_time
-	print 'Length of ttl_seconds = ', len(ttl_seconds)
+	print('Ephys file start time = ', start_time)
+	print('Length of ttl_seconds = ', len(ttl_seconds))
 
 
-	print 'type(ttl_seconds) ', type(ttl_seconds)
-	print 'ttl_seconds[0] ', type(ttl_seconds[0])
+	print('type(ttl_seconds) ', type(ttl_seconds))
+	print('ttl_seconds[0] ', type(ttl_seconds[0]))
 
 
-	print 'ttl_seconds[0:10] = ', ttl_seconds[0:10]
+	print('ttl_seconds[0:10] = ', ttl_seconds[0:10])
 
 	return ttl_seconds
 
@@ -101,7 +101,7 @@ def get_TTL_info(file_path,ch0=0,ch1=1):
 
 def convert2seconds(ttlins,file_path):
 
-	print 'Starting conversion to seconds'
+	#print 'Starting conversion to seconds'
 
 	filename_idx = file_path.find('636')
 	ephysfilename = file_path[filename_idx:filename_idx+18]
@@ -111,7 +111,7 @@ def convert2seconds(ttlins,file_path):
 	
 	#ttl_seconds = [thing*MSDNrate/fs + np.uint64(ephysfilename) for thing in ttlins]
 
-	print 'ttl[0:10 =', ttlins[0:10]
+	#print 'ttl[0:10 =', ttlins[0:10]
 
 	# get seconds.microseconds from start of file. 
 	
@@ -124,22 +124,22 @@ def convert2seconds(ttlins,file_path):
 
 
 
-	print 'Ephys file start time = ', start_time
-	print 'Length of ttl_seconds = ', len(ttl_seconds)
+	print('Ephys file start time = ', start_time)
+	print('Length of ttl_seconds = ', len(ttl_seconds))
 
 
-	print 'type(ttl_seconds) ', type(ttl_seconds)
-	print 'ttl_seconds[0] ', type(ttl_seconds[0])
+	print('type(ttl_seconds) ', type(ttl_seconds))
+	print('ttl_seconds[0] ', type(ttl_seconds[0]))
 
 
-	print 'ttl_seconds[0:10] = ', ttl_seconds[0:10]
+	print('ttl_seconds[0:10] = ', ttl_seconds[0:10])
 
 	return ttl_seconds
 
 def read_raw_ttl(file_path,swap_12_codes =0,limit=-1):
 	# these are the 'TTLIns' files. They contain the bit codes already! 
 	
-	print 'TTL path = ', file_path
+	print('TTL path = ', file_path)
 	# get ephys file name. This will be the 18-digit string starting with 636:
 	#filename_idx = file_path.find('636')
 
@@ -191,9 +191,9 @@ def read_raw_ttl(file_path,swap_12_codes =0,limit=-1):
 	codes[zeros]=0
 	codes[threes]=3
 
-	print ' TTLIns codes[0:10] = ', codes[0:10]
-	print 'shape of times = ', times.shape
-	print 'shape of codes = ', codes.shape
+	print(' TTLIns codes[0:10] = ', codes[0:10])
+	print('shape of times = ', times.shape)
+	print('shape of codes = ', codes.shape)
 
 	return np.vstack([times,codes]).T
 
@@ -201,10 +201,10 @@ if __name__ == "__main__":
 
 	times_ch_dirs = get_TTL_info()
 
-	print 'Shape of times_ch_dirs = ', times_ch_dirs.shape
-	print 'Times', times_ch_dirs[0,0:10]
-	print 'Channels', times_ch_dirs[1,0:10]
-	print 'Dirs', times_ch_dirs[2,0:10]
+	print('Shape of times_ch_dirs = ', times_ch_dirs.shape)
+	print('Times', times_ch_dirs[0,0:10])
+	print('Channels', times_ch_dirs[1,0:10])
+	print('Dirs', times_ch_dirs[2,0:10])
 
 
 

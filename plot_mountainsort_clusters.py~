@@ -9,7 +9,7 @@ import json
 sys.path.append("/Users/guitchounts/Documents/GitHub/mountainlab/old/WIP/python/mda/")
 sys.path.append('/Users/guitchounts/Dropbox (coxlab)/Scripts/Repositories/continuous-ephys/utils')
 
-from utils import read_titan_rhd
+import read_titan_rhd
 from mdaio import readmda
 
 def filter(ephys,freq_range,filt_order = 4,filt_type='bandpass',fs=10.):
@@ -29,10 +29,7 @@ if __name__ == "__main__":
     ### starting in a dir like GRat54/636xxxxx/0/
     #tetrode_num = 1
 
-    waveform_stats = {}
-
-    for tetrode_num in range(1,17):
-        waveform_stats[tetrode_num] = {}
+    for tetrode_num in range(1,8):
 
         tet_raw = readmda('./TetrodeData/Tetrode%d/data/rawT%d.mda' %(tetrode_num,tetrode_num))
         ## ^^ can also load from original RHD file. 
@@ -75,8 +72,6 @@ if __name__ == "__main__":
         isis = []
         for clu in np.unique(cluster_times_ids[2,:]):  #[9.,11.]: #
             
-
-
             tmp_waveforms = np.empty([4,np.where(cluster_times_ids[2,:] == clu)[0].shape[0],spike_width]) ### 4xnum_spikesx32
             
             peaks = cluster_times_ids[1,np.where(cluster_times_ids[2,:]==clu)[0]].astype('int') ## index of tet4 where peak happens
@@ -98,11 +93,8 @@ if __name__ == "__main__":
                                                                            #'width_ratios':[1,2]}) # , figsize=(2,6)
         #print('clusts = ',clusts)                                                                  
         for clu_idx,clu in enumerate(clusts):
-            
-            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'metrics' : []  }
-
             for ch in range(4):
-                
+            
                 #clust_times = np.where(xx[2,:].astype('int') == 9)[0]
                 #axarr[clu_idx].plot(range(0+32*ch,32+32*ch), np.mean(waveforms[clu_idx][ch,:,:],axis=0))
                 #print('clu,waveforms[clu_idx].shape = ',clu,waveforms[clu_idx].shape)
@@ -114,16 +106,6 @@ if __name__ == "__main__":
                 axarr[clu_idx,0].set_title('%d Spikes in Cluster %d' % (waveforms[clu_idx].shape[1],clu),fontdict={'fontsize' : 6})
                 #axarr[clu_idx,1].hist(isis[clu_idx],bins=200)
                 
-
-                ### get waveform stats (width, peak:trough, slope at the end, firing rates )
-                min_wv = np.argmin(y)
-                max_wv = min_wv + np.argmax(y.flatten()[min_wv:min_wv+spike_width/2])
-                width = (max_wv - min_wv) / fs * 1e3
-                height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
-
-                waveform_stats[tetrode_num][clu]['widths'].append(width)
-                waveform_stats[tetrode_num][clu]['heights'].append(height)
-
                 #clu_isi = np.diff(clu_times) ## convert from seconds to ms
 
                 axarr[clu_idx,1].hist(isis[clu_idx],bins=np.logspace(-1,2,100),range=[0.1,100],histtype='stepfilled')
@@ -145,8 +127,6 @@ if __name__ == "__main__":
                 axarr[clu_idx,1].axes.xaxis.set_ticks([])
                 axarr[clu_idx,1].axes.yaxis.set_ticklabels([])
                 axarr[clu_idx,1].axes.yaxis.set_ticks([])
-
-            waveform_stats[tetrode_num][clu]['metics'] = metrics['clusters'][clu_idx] #['firing_rate']
 
             axarr[clu_idx,2].text(0,0,metrics['clusters'][clu_idx],wrap=True,fontdict={'fontsize' : 6})
             axarr[clu_idx,2].axes.yaxis.set_ticklabels([])
@@ -170,9 +150,4 @@ if __name__ == "__main__":
         d = dict(times = cluster_times_ids[1,:]/3e4,clusters=cluster_times_ids[2,:]) ### save times in seconds and cluster assignments
         cluster_assignments = pd.DataFrame.from_dict(d)
         cluster_assignments.to_csv(save_path + '/cluster_assignments.csv')
-
-
-        waveform_stats_frame = pd.DataFrame.from_dict(waveform_stats)
-        waveform_stats_frame.to_csv(save_path + '/waveform_stats.csv')
-
 

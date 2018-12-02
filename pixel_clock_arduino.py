@@ -2,13 +2,11 @@
 import sys, os,re
 import h5py
 from utils import pixelclock, timebase
-import open_ephys
+#import open_ephys
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.matlib
-from get_bitcode_simple import get_bitcode_simple
 import itertools
-import concatenateKWIKfiles
 import pandas as pd
 from bokeh.io import output_file, show #,  vplot
 from bokeh.layouts import row,gridplot
@@ -22,10 +20,12 @@ import  titanspikes_ttl_extract
 # mworks
 try:
     sys.path.append('/Library/Application Support/MWorks/Scripting/Python')
+    sys.path.append('/Users/guitchounts1/Library/Application Support/MWorks/Scripting/Python')
+    
     import mworks.data as mw
 except Exception as e:
     print("Please install mworks...")
-    print e
+    print(e)
 
 
 def isiterable(o):
@@ -69,7 +69,7 @@ def lowpass_codetimes(code_times,fs,thresh_samples = 0.2):
 
     for idx,item in enumerate(diffs):
         if item < thresh:
-            print 'time less than thresh = ', item
+            print('time less than thresh = ', item)
             
             dels.append(idx)
 
@@ -101,7 +101,7 @@ def fit_line(oe,mw):  #### oe = x; mw = y variable.
     A = np.vstack([oe[0:max_match], np.ones(len(oe[0:max_match]))]).T ## ! might be dangerous to hardcode the 1000 here but using 
     # length = min(len(oe),len(mw)) ==== 13000 in the case for one exp for grat17 == bad result (likely because the matches suck beyond the very beginning)
     m,c = np.linalg.lstsq(A,mw[0:max_match])[0]
-    print 'm,c = ', m,c
+    print('m,c = ', m,c)
 
     return m,c
 
@@ -133,24 +133,15 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     experiment_length=[]
 
 
-    print 'Experiment length = ', experiment_length    
+    print('Experiment length = ', experiment_length)
 
 
-    # duplicate every element of times and directions
-
-    # rel_times_0 = times[channels==0]
-    # rel_times_1 = times[channels==1]
-    # rel_directions_0 = directions[channels==0]
-    # rel_directions_1 = directions[channels==1]
-
-    # plot_times_0 = np.array(list(itertools.chain(*zip(rel_times_0,rel_times_0[1:]))))
-    # plot_times_1 = np.array(list(itertools.chain(*zip(rel_times_1,rel_times_1[1:]))))
-    # plot_directions_0 = np.array(list(itertools.chain(*zip(rel_directions_0,rel_directions_0[:-1]))))
-    # plot_directions_1 = np.array(list(itertools.chain(*zip(rel_directions_1,rel_directions_1[:-1]))))
-
+    
     
 
     oe_codes, latencies = pixelclock.events_to_codes(np.vstack((times, channels, directions)).T, len(oe_channels), 0.01,swap_12_codes =1,swap_03_codes=0)
+   
+    
    
     # the pixel clock should change once per frame, or at ~16ms max. This is 16ms * 30samples/ms = 480 samples. If a code is shorter than that, it's probably a fluke.
     # if oe_code times are in 636... format, use 10e4 as min code length
@@ -159,7 +150,7 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     #oe_codes = titanspikes_ttl_extract.read_raw_ttl(os.getcwd() + '/636598533041104644/TTLIns',swap_12_codes =1,limit=1e7) 
 
 
-    print 'Number of ephys codes = ', len(oe_codes)
+    print('Number of ephys codes = ', len(oe_codes))
 
    
     
@@ -168,7 +159,7 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     names = ['time','bit1','bit2','ox','oy','oz','ax','ay','az']
     head_data = pd.read_csv(ard_path,names=names)
 
-    print head_data[0:15]
+    print(head_data[0:15])
 
 
     head_data.time  = head_data.time / 1e3 ## convert from ms to sec
@@ -233,7 +224,7 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     # ard_codes = zip(uni_times,uni_codes)
 
   
-    print 'Number of Arduino codes = ', len(ard_codes)
+    print('Number of Arduino codes = ', len(ard_codes))
   
    #### special skipping first few codes (which are bad,mkay) to get better matches- 8/3/16 for grat17:
 
@@ -241,18 +232,18 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     oe_codes = oe_codes[skip_ephys:max_codes]
 
     # 3. get pixel clock matches
-    print '############################### PREPARING TO MATCH CODES #######################################'
+    print('############################### PREPARING TO MATCH CODES #######################################')
     matches = []
     #win_size = 20 ### WIN SIZE is now a kwarg
-    print 'win max is ',int(len(oe_codes)/win_size)
+    print('win max is ',int(len(oe_codes)/win_size))
     for win in range(0,int(len(oe_codes)/win_size),10): #range(int(round(len(oe_codes)/win_size)))
     #for idx,win in enumerate(range(int(len(oe_codes)/win_size))):
-        print 'win = ', win
+        print('win = ', win)
         if win*win_size+win_size < len(oe_codes):
             ## don't go thru all arduino codes, but start at the previous time. (i.e. move forward!)
             if len(matches) > 1:
                 ard_idx = np.where([thing[0] == matches[-1][1] for thing in ard_codes])[0][0]
-                print 'ard idx and last match time = ', ard_idx,matches[-1][1]
+                print('ard idx and last match time = ', ard_idx,matches[-1][1])
             else:
                 ard_idx = 0
 
@@ -266,10 +257,10 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
                 [evt[1] for evt in ard_codes[ard_idx:]], # mw codes
                 minMatch = minMatch, ###15
                 maxErr = 0) 
-            print 'temp matches = ', tmp_match
+            print('temp matches = ', tmp_match)
             matches.extend(tmp_match)
         else:
-            print '!!win = ', win
+            #print '!!win = ', win
             tmp_match = pixelclock.match_codes(
                     [evt[0] for evt in oe_codes[win*win_size:-1]], # oe times
                     [evt[1] for evt in oe_codes[win*win_size:-1]], # oe codes
@@ -281,8 +272,8 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
             matches.extend(tmp_match)
     
     
-    print 'matches = ', matches
-    print 'type = ', type(matches)
+    print('matches = ', matches)
+    #print 'type = ', type(matches)
    
     ard_times = [item[0] for item in ard_codes] #[e.time for e in stimulus_announces if isiterable(e.value)]
     oe_times = [item[0] for item in oe_codes]
@@ -364,7 +355,7 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
 
     ## to test quality of match, plot OE codes in MW time
 
-    print 'len plot_oe_codetimes = ', len(plot_oe_codetimes)
+    print('len plot_oe_codetimes = ', len(plot_oe_codetimes))
 
 
 
@@ -455,13 +446,13 @@ def sync_pixel_clock(ard_path, oe_path, oe_channels=[0, 1],skip_head=0,skip_ephy
     show(pp)
 
 
-    print "number of Arduino events:"
-    print len(ard_times)
+    print("number of Arduino events:")
+    print(len(ard_times))
 
-    print "number of OE events:"
-    print len(oe_times)
+    print("number of OE events:")
+    print(len(oe_times))
 
-    print "number of matches: " + str(len(matches))
+    print("number of matches: " + str(len(matches)))
     
 
     
@@ -487,9 +478,9 @@ if __name__ == "__main__":
     oe_path = sys.argv[1]
     ard_path = sys.argv[2]
 
-    print 'ard_path path is ', ard_path
+    print('ard_path path is ', ard_path)
 
-    print 'oe path is ', oe_path
+    print('oe path is ', oe_path)
 
 
     matches,m,c,experiment_length,head_data = sync_pixel_clock(ard_path, oe_path, oe_channels=[2,3],skip_head=2,skip_ephys=0)
