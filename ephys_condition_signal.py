@@ -30,7 +30,7 @@ def median_rejection(ephys,channels,exclude=[]):
     else:
         for index in sorted(exclude,reverse=True):
             keep_channels = np.delete(channels,index-1) ### subtracting 1 b/c added it to channels.  
-    print 'channels ===== ', channels
+    print('channels ===== ', channels)
     if len(ephys.shape) == 3: ### assuming ephys is samples x trials x channels
         
         for trial in range(ephys.shape[1]):
