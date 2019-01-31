@@ -72,7 +72,7 @@ if __name__ == "__main__":
         ## e.g. 4x 32 x 100000 waveforms. use cluster_times_ids mat to separate cluster IDs. 
         ## in tet_filt, find the indexes of spiketimes and extract -16 until +16 timepoints for each. 
 
-        spike_width = 32 # number of samples to take, centered at spike peak. #(16,16)  
+        spike_width = 64 # number of samples to take, centered at spike peak. #(16,16)  
 
         waveforms = [] ## list of arrays. length = number of clusters
         isis = []
@@ -120,9 +120,24 @@ if __name__ == "__main__":
 
                 ### get waveform stats (width, peak:trough, slope at the end, firing rates )
                 min_wv = np.argmin(y)
-                max_wv = min_wv + np.argmax(y.flatten()[min_wv:])  ### [min_wv:min_wv+spike_width/2])
-                width = (max_wv - min_wv) / fs * 1e3
-                height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
+                max_wv = min_wv + np.argmax(y.flatten()[min_ wv:])  ### [min_wv:min_wv+spike_width/2])
+                
+                peak = spike_width/2
+
+                if y[peak] < 0:
+
+                    max_post_peak = np.argmax(y.flatten()[peak:])
+                
+                elif y[peak] > 0:
+
+                    max_post_peak = np.argmin(y.flatten()[peak:])
+
+                #width = (max_wv - min_wv) / fs * 1e3
+                #height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
+                width = (max_post_peak - peak) / fs * 1e3 ## in ms
+                height = abs(y.flatten()[peak]) / abs(y.flatten()[max_post_peak])
+
+
                 slope = np.mean(np.gradient( y[-spike_width/4 : ]  )) ## take the mean gradient of the end of the spike waveform... 
 
 
