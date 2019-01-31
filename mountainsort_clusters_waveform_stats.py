@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
                 ### get waveform stats (width, peak:trough, slope at the end, firing rates )
                 min_wv = np.argmin(y)
-                max_wv = min_wv + np.argmax(y.flatten()[min_ wv:])  ### [min_wv:min_wv+spike_width/2])
+                max_wv = min_wv + np.argmax(y.flatten()[min_wv:])  ### [min_wv:min_wv+spike_width/2])
                 
                 peak = spike_width/2
 
