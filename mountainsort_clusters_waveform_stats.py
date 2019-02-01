@@ -63,7 +63,8 @@ if __name__ == "__main__":
 
         tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
 
-        
+        print('tet_filt type = ', type(tet_filt))
+        print(tet_filt[0:10])
 
 
         ### Gather the avg waveforms from each cluster:
@@ -111,7 +112,7 @@ if __name__ == "__main__":
                 #clust_times = np.where(xx[2,:].astype('int') == 9)[0]
                 #axarr[clu_idx].plot(range(0+32*ch,32+32*ch), np.mean(waveforms[clu_idx][ch,:,:],axis=0))
                 #print('clu,waveforms[clu_idx].shape = ',clu,waveforms[clu_idx].shape)
-                y = np.mean(waveforms[clu_idx][ch,:,:],axis=0)
+                y = np.mean(waveforms[clu_idx][ch,:,:],axis=0) ### wavefoms[clu_idx] is [4 x num_spikes x 64]. y is just [64,]
                 err = np.std(waveforms[clu_idx][ch,:,:],axis=0)
                 #x = range(0+spike_width*ch,spike_width+spike_width*ch)
                 x = np.arange(-(spike_width/2.)/fs*1e3,(spike_width/2.)/fs*1e3, 1./fs*1e3)
