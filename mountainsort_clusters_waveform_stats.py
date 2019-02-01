@@ -62,10 +62,13 @@ if __name__ == "__main__":
         fs = 3e4
 
         tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
+        ### This is uint16 (not int16) (because found some values like 32938, which is above 32,767, which is int16's upper lim. )
+        ### so the range of our values is 0 to 65,535. To convert, subtract 32768 and * 1.95e-7
+        tet_filt = (tet_filt.astype('double') - 32768) * 1.95e-7 ## in Volts now. 
 
-        print('tet_filt type = ', type(tet_filt[0])) ## - 32768) * 1.95e-7
-        print(tet_filt[0:10])
-        print('np.where(tet_filt < 0) ==== ', np.where(tet_filt < 0))
+        
+       
+
 
         ### Gather the avg waveforms from each cluster:
 
