@@ -102,7 +102,7 @@ if __name__ == "__main__":
         #print('clusts = ',clusts)                                                                  
         for clu_idx,clu in enumerate(clusts):
             
-            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'slopes' : [], 'metrics' : []  }
+            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'slopes' : [], 'metrics' : [], 'waveform' : []  }
 
             for ch in range(4):
                 
@@ -126,11 +126,11 @@ if __name__ == "__main__":
 
                 if y[peak] < 0:
 
-                    max_post_peak = np.argmax(y.flatten()[peak:])
+                    max_post_peak = peak + np.argmax(y.flatten()[peak:])
                 
                 elif y[peak] > 0:
 
-                    max_post_peak = np.argmin(y.flatten()[peak:])
+                    max_post_peak = peak + np.argmin(y.flatten()[peak:])
 
                 #width = (max_wv - min_wv) / fs * 1e3
                 #height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
@@ -144,6 +144,7 @@ if __name__ == "__main__":
                 waveform_stats[tetrode_num][clu]['widths'].append(width)
                 waveform_stats[tetrode_num][clu]['heights'].append(height)
                 waveform_stats[tetrode_num][clu]['slopes'].append(slope)
+                waveform_stats[tetrode_num][clu]['waveform'].append(y)
 
                 #clu_isi = np.diff(clu_times) ## convert from seconds to ms
 
