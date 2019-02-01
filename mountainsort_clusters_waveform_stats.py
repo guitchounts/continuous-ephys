@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
         print('tet_filt type = ', type(tet_filt[0])) ## - 32768) * 1.95e-7
         print(tet_filt[0:10])
-
+        print('np.where(tet_filt < 0) ==== ', np.where(tet_filt < 0))
 
         ### Gather the avg waveforms from each cluster:
 
