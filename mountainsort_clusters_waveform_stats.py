@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
         fs = 3e4
 
-        tet_filt = filter(tet_raw.T,[800,8e3],fs=fs).T
+        tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
 
         
 
@@ -102,7 +102,9 @@ if __name__ == "__main__":
         #print('clusts = ',clusts)                                                                  
         for clu_idx,clu in enumerate(clusts):
             
-            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [], 'slopes' : [], 'metrics' : [], 'waveform' : []  }
+            waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [],
+                                                 'slopes' : [], 'metrics' : [], 
+                                                 'fwhm' : [], 'waveform' : []  }
 
             for ch in range(4):
                 
@@ -111,40 +113,58 @@ if __name__ == "__main__":
                 #print('clu,waveforms[clu_idx].shape = ',clu,waveforms[clu_idx].shape)
                 y = np.mean(waveforms[clu_idx][ch,:,:],axis=0)
                 err = np.std(waveforms[clu_idx][ch,:,:],axis=0)
-                x = range(0+spike_width*ch,spike_width+spike_width*ch)
-                #axarr[clu_idx,0].plot(x,y,c='k',lw=.25)
-                #axarr[clu_idx,0].fill_between(x, y-err, y+err,alpha=.25,color='k',linewidth=0)
-                #axarr[clu_idx,0].set_title('%d Spikes in Cluster %d' % (waveforms[clu_idx].shape[1],clu),fontdict={'fontsize' : 6})
-                #axarr[clu_idx,1].hist(isis[clu_idx],bins=200)
+                #x = range(0+spike_width*ch,spike_width+spike_width*ch)
+                x = np.arange(-(spike_width/2.)/fs*1e3,(spike_width/2.)/fs*1e3, 1./fs*1e3)
+
+                #### Interpolate waveforms to get better width estimates!
+                new_fs = fs*8
+                new_x = np.arange(-(spike_width/2.)/fs*1e3,(spike_width/2.)/fs*1e3, 1./new_fs*1e3)
+                new_y = np.interp(new_x,x,y)
                 
+                new_peak = int(new_x.shape[0] / 2) ## not 32 but 512/2
+
+                half_max = new_y[new_peak] / 2
+                idx1 = (np.abs(new_y[:new_peak] - half_max)).argmin()
+                idx2 = new_peak+ (np.abs(new_y[new_peak:] - half_max)).argmin()
+
+                fwhm =  (idx2-idx1) / new_fs * 1e3
+
 
                 ### get waveform stats (width, peak:trough, slope at the end, firing rates )
-                min_wv = np.argmin(y)
-                max_wv = min_wv + np.argmax(y.flatten()[min_wv:])  ### [min_wv:min_wv+spike_width/2])
+                #min_wv = np.argmin(y)
+                #max_wv = min_wv + np.argmax(y.flatten()[min_wv:])  ### [min_wv:min_wv+spike_width/2])
                 
                 peak = spike_width/2
 
-                if y[peak] < 0:
+                if new_y[new_peak] < 0:
 
-                    max_post_peak = peak + np.argmax(y.flatten()[peak:])
+                    max_post_peak = new_peak + np.argmax(new_y.flatten()[new_peak:])
                 
-                elif y[peak] > 0:
+                elif new_y[new_peak] > 0:
 
-                    max_post_peak = peak + np.argmin(y.flatten()[peak:])
+                    max_post_peak = new_peak + np.argmin(new_y.flatten()[new_peak:])
 
                 #width = (max_wv - min_wv) / fs * 1e3
                 #height = abs(y.flatten()[max_wv]) / abs(y.flatten()[min_wv])
-                width = (max_post_peak - peak) / fs * 1e3 ## in ms
-                height = abs(y.flatten()[peak]) / abs(y.flatten()[max_post_peak])
+                width = (max_post_peak - new_peak) / new_fs * 1e3 ## in ms
+                height = abs(new_y.flatten()[peak]) / abs(new_y.flatten()[max_post_peak])
+
+                ### FWHM = full width at half maximum:
 
 
-                slope = np.mean(np.gradient( y[-spike_width/4 : ]  )) ## take the mean gradient of the end of the spike waveform... 
+
+                ## want slope ~0.3-0.5 ms after peak
+
+                slope = np.mean(np.gradient( y[peak+9 : peak+15]   )) ## was: y[-spike_width/4 : ]  take the mean gradient of the end of the spike waveform... 
 
 
                 waveform_stats[tetrode_num][clu]['widths'].append(width)
                 waveform_stats[tetrode_num][clu]['heights'].append(height)
                 waveform_stats[tetrode_num][clu]['slopes'].append(slope)
                 waveform_stats[tetrode_num][clu]['waveform'].append(y)
+                waveform_stats[tetrode_num][clu]['fwhm'].append(fwhm)
+
+
 
                 #clu_isi = np.diff(clu_times) ## convert from seconds to ms
 
