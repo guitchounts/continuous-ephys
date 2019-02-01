@@ -61,11 +61,12 @@ if __name__ == "__main__":
 
         fs = 3e4
 
-        tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
+        #tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
         ### This is uint16 (not int16) (because found some values like 32938, which is above 32,767, which is int16's upper lim. )
         ### so the range of our values is 0 to 65,535. To convert, subtract 32768 and * 1.95e-7
-        tet_filt = (tet_filt.astype('double') - 32768) * 1.95e-7 ## in Volts now. 
+        tet_raw = (tet_raw.astype('double') - 32768) * 1.95e-7 ## in Volts now. 
 
+        tet_filt = filter(tet_raw.T,[800,8e3],fs=fs).T
         
        
 
@@ -79,6 +80,7 @@ if __name__ == "__main__":
         spike_width = 64 # number of samples to take, centered at spike peak. #(16,16)  
 
         waveforms = [] ## list of arrays. length = number of clusters
+        waveforms_filt = []
         isis = []
         for clu in np.unique(cluster_times_ids[2,:]):  #[9.,11.]: #
             
@@ -92,10 +94,12 @@ if __name__ == "__main__":
             #clu_times = xx[1,np.where(xx[2,:]==clu)[0]]
             isis.append(np.diff(clu_times)/fs*1e3) ## in milliseconds
             
-            tmp_waveforms = tet_filt[:,[np.arange(peak-spike_width/2,peak+spike_width/2) for peak in peaks]]
+            tmp_waveforms = tet_raw[:,[np.arange(peak-spike_width/2,peak+spike_width/2) for peak in peaks]]
             waveforms.append(tmp_waveforms)
             
             
+            tmp_waveforms_filt = tet_filt[:,[np.arange(peak-spike_width/2,peak+spike_width/2) for peak in peaks]]
+            waveforms_filt.append(tmp_waveforms_filt)
 
 
         #### NO figure
@@ -108,7 +112,7 @@ if __name__ == "__main__":
             
             waveform_stats[tetrode_num][clu] = {'widths' : [], 'heights' : [],
                                                  'slopes' : [], 'metrics' : [], 
-                                                 'fwhm' : [], 'waveform' : []  }
+                                                 'fwhm' : [], 'waveform' : [], 'waveform_filt' : []  }
 
             for ch in range(4):
                 
@@ -116,6 +120,8 @@ if __name__ == "__main__":
                 #axarr[clu_idx].plot(range(0+32*ch,32+32*ch), np.mean(waveforms[clu_idx][ch,:,:],axis=0))
                 #print('clu,waveforms[clu_idx].shape = ',clu,waveforms[clu_idx].shape)
                 y = np.mean(waveforms[clu_idx][ch,:,:],axis=0) ### wavefoms[clu_idx] is [4 x num_spikes x 64]. y is just [64,]
+                y_filt = np.mean(waveforms_filt[clu_idx][ch,:,:],axis=0) 
+
                 err = np.std(waveforms[clu_idx][ch,:,:],axis=0)
                 #x = range(0+spike_width*ch,spike_width+spike_width*ch)
                 x = np.arange(-(spike_width/2.)/fs*1e3,(spike_width/2.)/fs*1e3, 1./fs*1e3)
@@ -130,7 +136,7 @@ if __name__ == "__main__":
                 half_max = new_y[new_peak] / 2
                 idx1 = (np.abs(new_y[:new_peak] - half_max)).argmin()
                 idx2 = new_peak+ (np.abs(new_y[new_peak:] - half_max)).argmin()
-
+                ### FWHM = full width at half maximum:
                 fwhm =  (idx2-idx1) / new_fs * 1e3
 
 
@@ -153,7 +159,7 @@ if __name__ == "__main__":
                 width = (max_post_peak - new_peak) / new_fs * 1e3 ## in ms
                 height = abs(new_y.flatten()[peak]) / abs(new_y.flatten()[max_post_peak])
 
-                ### FWHM = full width at half maximum:
+                
 
 
 
@@ -166,6 +172,7 @@ if __name__ == "__main__":
                 waveform_stats[tetrode_num][clu]['heights'].append(height)
                 waveform_stats[tetrode_num][clu]['slopes'].append(slope)
                 waveform_stats[tetrode_num][clu]['waveform'].append(y)
+                waveform_stats[tetrode_num][clu]['waveform_filt'].append(y_filt)
                 waveform_stats[tetrode_num][clu]['fwhm'].append(fwhm)
 
 
