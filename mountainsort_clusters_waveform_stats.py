@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
         tet_filt = tet_raw ## collecting stats on unfiltered waveforms! ###filter(tet_raw.T,[800,8e3],fs=fs).T
 
-        print('tet_filt type = ', type(tet_filt))
+        print('tet_filt type = ', type(tet_filt[0])) ## - 32768) * 1.95e-7
         print(tet_filt[0:10])
 
 
