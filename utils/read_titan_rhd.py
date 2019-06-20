@@ -35,7 +35,7 @@ class ReadTitanRHD(object):
         num_chunks = int(num_chunks)
 
         print('Reading in %d chunks, starting at offset %d' % (num_chunks,offset))
-        f = open(self.file_path)
+        f = open(self.file_path,'rb')
 
         self.data = np.chararray([num_chunks],itemsize=self.chunk_size)
 
@@ -54,7 +54,7 @@ class ReadTitanRHD(object):
 
     def read_in_chunks(self,file_object, chunk_size=176,num_chunks=1,offset=0):
         counter = 0
-        file_object.seek(offset)
+        file_object.seek(int(offset))
 
         while counter < num_chunks:
                       

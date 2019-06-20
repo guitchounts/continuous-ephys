@@ -94,11 +94,11 @@ if __name__ == "__main__":
             #clu_times = xx[1,np.where(xx[2,:]==clu)[0]]
             isis.append(np.diff(clu_times)/fs*1e3) ## in milliseconds
             
-            tmp_waveforms = tet_raw[:,[np.arange(peak-spike_width/2,peak+spike_width/2) for peak in peaks]]
+            tmp_waveforms = tet_raw[:,[np.arange(peak-spike_width/2,peak+spike_width/2,dtype='int') for peak in peaks]]
             waveforms.append(tmp_waveforms)
+             
             
-            
-            tmp_waveforms_filt = tet_filt[:,[np.arange(peak-spike_width/2,peak+spike_width/2) for peak in peaks]]
+            tmp_waveforms_filt = tet_filt[:,[np.arange(peak-spike_width/2,peak+spike_width/2,dtype='int') for peak in peaks]]
             waveforms_filt.append(tmp_waveforms_filt)
 
 
